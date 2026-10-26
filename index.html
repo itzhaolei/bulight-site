@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>布光 Bulight · 把屏幕变成一盏有刻度的灯</title>
+<meta name="description" content="布光 Bulight 是一盏屏幕补光灯：色温 2500–9000K 无级调节，拖动光位，白纸一键校准，拍完自动校正偏色。无广告、无订阅、无账号，¥1 一次买断。">
+<meta name="theme-color" content="#0C0C0F">
+<meta property="og:title" content="布光 Bulight · 把屏幕变成一盏有刻度的灯">
+<meta property="og:description" content="够亮、够准、拍得对。¥1 一次买断，无广告、无订阅、无账号。">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --ink:#0C0C0F; --text:#EDE9E1; --body:#B6B0A5; --muted:#837E75;
+    --warm:#E9C07A; --warm-2:#F4D9AB;
+    --line:rgba(233,192,122,.15);
+    --card:rgba(255,255,255,.033);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--ink); color:var(--text);
+    font:400 16px/1.78 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Noto Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0 20px calc(56px + env(safe-area-inset-bottom));
+    min-height:100vh; position:relative;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(92% 56% at 50% -10%, rgba(233,192,122,.20) 0%, rgba(233,192,122,.055) 40%, transparent 70%),
+      radial-gradient(52% 38% at 88% 4%, rgba(233,192,122,.085) 0%, transparent 64%),
+      radial-gradient(70% 44% at 6% 102%, rgba(233,192,122,.04) 0%, transparent 66%);
+  }
+  .wrap{position:relative; z-index:1; max-width:700px; margin:0 auto}
+
+  /* 导航 */
+  nav{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; gap:18px;
+    padding:20px 0 16px;
+    background:linear-gradient(to bottom, var(--ink) 62%, rgba(12,12,15,0));
+  }
+  .brand{display:flex; align-items:center; text-decoration:none; padding-right:2px}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--warm);
+    box-shadow:0 0 14px 3px rgba(233,192,122,.55)}
+  nav ul{display:flex; gap:20px; list-style:none; font-size:14px}
+  nav a.navlink{color:var(--muted); text-decoration:none; transition:color .18s; letter-spacing:.03em}
+  nav a.navlink:hover,nav a.navlink[aria-current]{color:var(--warm)}
+
+  /* 首屏 */
+  header{padding:28px 0 8px}
+  .mark{
+    width:62px; height:62px; border-radius:17px; margin-bottom:28px;
+    background:radial-gradient(100% 100% at 32% 28%, #FFF7E7 0%, #F1D09A 30%, #C08E45 58%, #2A2116 86%, #141110 100%);
+    box-shadow:0 0 64px -14px rgba(233,192,122,.6), inset 0 0 0 .5px rgba(255,255,255,.22);
+  }
+  h1{
+    font-size:clamp(38px, 10vw, 52px); font-weight:600; line-height:1.08;
+    letter-spacing:-.02em;
+  }
+  h1 span{color:var(--warm); font-weight:400; letter-spacing:.02em}
+  .lede{
+    margin-top:18px; max-width:26em;
+    font-size:clamp(17px, 4.4vw, 19px); line-height:1.7; color:var(--body);
+  }
+  .meta{margin-top:20px; font-size:13px; letter-spacing:.05em; color:var(--muted)}
+
+  .cta{
+    display:inline-flex; align-items:center; margin-top:30px;
+    padding:14px 26px; border-radius:999px; text-decoration:none;
+    background:linear-gradient(180deg, var(--warm-2), var(--warm));
+    color:#1A150E; font-size:15px; font-weight:600; letter-spacing:.01em;
+    box-shadow:0 10px 32px -12px rgba(233,192,122,.75), inset 0 1px 0 rgba(255,255,255,.45);
+  }
+  .cta-note{margin-top:12px; font-size:12.5px; color:var(--muted); letter-spacing:.03em}
+
+  /* 卖点 */
+  .kicker{
+    margin:56px 0 14px; font-size:11.5px; font-weight:600;
+    letter-spacing:.22em; color:var(--warm);
+  }
+  .feature{
+    padding:22px 0; border-top:1px solid var(--line);
+    display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start;
+  }
+  .feature .num{font-size:12px; color:var(--warm); letter-spacing:.12em; padding-top:6px; opacity:.7}
+  .feature h2{font-size:20px; font-weight:600; letter-spacing:-.01em; line-height:1.4}
+  .feature p{margin-top:8px; color:var(--body); max-width:60ch}
+  .feature strong{color:var(--text); font-weight:600}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+  .chip{
+    font-size:13px; color:var(--body); padding:6px 12px; border-radius:999px;
+    border:1px solid var(--line); background:var(--card); white-space:nowrap;
+  }
+  .chip b{color:var(--warm); font-weight:600}
+
+  /* 价格 */
+  .price{
+    margin:52px 0 0; padding:28px 24px; border-radius:18px;
+    background:
+      radial-gradient(120% 100% at 0% 0%, rgba(233,192,122,.10), transparent 58%),
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+    border:1px solid rgba(233,192,122,.22);
+  }
+  .price .k{font-size:11.5px; letter-spacing:.22em; color:var(--warm); font-weight:600}
+  .price .v{margin:10px 0 4px; font-size:clamp(26px,7vw,32px); font-weight:600; letter-spacing:-.02em}
+  .price p{font-size:14.5px; color:var(--body); margin-top:12px}
+  .price ul{margin:10px 0 0; padding-left:18px; color:var(--body); font-size:14.5px}
+  .price li{margin-bottom:6px}
+
+  /* 页脚 */
+  footer{
+    margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:8px 22px;
+    font-size:13px; color:var(--muted);
+  }
+  footer a{color:var(--body); text-decoration:none; border-bottom:1px solid transparent; transition:color .18s, border-color .18s}
+  footer a:hover{color:var(--warm); border-bottom-color:var(--line)}
+  footer .cp{margin-left:auto}
+  @media (max-width:430px){footer .cp{margin-left:0; width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="brand" href="./index.html" aria-label="布光首页"><span class="dot" aria-hidden="true"></span></a>
+    <ul>
+      <li><a class="navlink" href="./index.html" aria-current="page">布光</a></li>
+      <li><a class="navlink" href="./privacy.html">隐私</a></li>
+      <li><a class="navlink" href="./support.html">支持</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <div class="mark" aria-hidden="true"></div>
+    <h1>布光 <span>Bulight</span></h1>
+    <p class="lede">把 iPhone 的屏幕，变成一盏有刻度的灯。拖动光位，调准色温，拍完自动校正偏色。</p>
+    <p class="meta">屏幕补光与光位工具 · iPhone / iPad · iOS 16 起</p>
+
+    <a class="cta" href="#" data-store-link>在 App Store 获取</a>
+    <p class="cta-note">首发上线后，此处直达 App Store</p>
+  </header>
+
+  <p class="kicker">为什么是布光</p>
+
+  <div class="feature">
+    <div class="num">01</div>
+    <div>
+      <h2>够亮</h2>
+      <p>用 HDR 峰值输出把屏幕白色推到 SDR 白点之上，暗处比普通白底更亮。不是滤镜提亮，是<strong>面板真的更亮</strong>。提升幅度取决于设备面板与当前屏幕亮度，App 显示的是此刻真实可用的余量，不承诺固定倍数。</p>
+    </div>
+  </div>
+
+  <div class="feature">
+    <div class="num">02</div>
+    <div>
+      <h2>够准</h2>
+      <p>色温 <strong>2500–9000K</strong> 无级调节，按黑体辐射拟合，6500K 处即纯白。拿一张 A4 纸做白纸校准，自动反算这块屏幕的偏色并补偿；True Tone、夜览开着时会主动提醒，因为它们会让白点漂移。</p>
+      <div class="chips">
+        <span class="chip"><b>4500K</b></span>
+        <span class="chip"><b>5000K</b></span>
+        <span class="chip"><b>5500K</b></span>
+        <span class="chip"><b>D65</b></span>
+        <span class="chip">验色模式 · 四档固定光源</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature">
+    <div class="num">03</div>
+    <div>
+      <h2>拍得对</h2>
+      <p>手指按在屏幕上，光就跟着走——侧光、顶光、底光随手做。四种光型各有实际衰减方向，不是四张壁纸。连拍时钉住曝光与白平衡，一批照片同一个白点，不用后期一张张拉曲线。</p>
+      <div class="chips">
+        <span class="chip">柔光箱</span>
+        <span class="chip">环形光</span>
+        <span class="chip">侧光</span>
+        <span class="chip">眼神光</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature">
+    <div class="num">04</div>
+    <div>
+      <h2>干净</h2>
+      <p>不做美颜，不做滤镜，不做广告，不做订阅。没有账号，没有云端，没有埋点。照片与设置只留在这台设备上，不连接我们的服务器。<strong>App 隐私标签：不收集数据。</strong></p>
+    </div>
+  </div>
+
+  <div class="price">
+    <div class="k">一次买断</div>
+    <div class="v">¥1 · 永久使用</div>
+    <p>免费下载即可点灯、拖光位、调色温。¥1 解锁这三件更专业的东西：</p>
+    <ul>
+      <li>HDR 峰值输出（免费版为 SDR 渐变）</li>
+      <li>保存自己的配方、导入配方码</li>
+      <li>拍摄时锁定曝光与白平衡，连拍颜色一致</li>
+    </ul>
+    <p>换手机可恢复购买，不重复收费。</p>
+  </div>
+
+  <footer>
+    <a href="./privacy.html">隐私政策</a>
+    <a href="./support.html">支持与反馈</a>
+    <span class="cp">© 2026 Lei Zhao</span>
+  </footer>
+
+</div>
+</body>
+</html>
